@@ -1,6 +1,9 @@
 import tkinter as tk
 from tkinter import ttk
 from controllers.product_controller import ProductController
+from tkinter import font, messagebox
+from pathlib import Path
+import ctypes
 
 class HomeScreen(tk.Frame):
     def __init__(self, master, show_frame):
@@ -11,12 +14,14 @@ class HomeScreen(tk.Frame):
         self.controller = ProductController(self)
         self.cart_items = {}
 
+        print("sheeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+
         # Canvas
         self.canvas = tk.Canvas(self, bg="#FFFFFF")
         self.canvas.pack(fill=tk.BOTH, expand=True)
 
         # Heading
-        self.canvas.create_text(350, 40, text="Cravings", font=("Arial", 16, "bold"))
+        self.canvas.create_text(350, 40, text="Cravings")
 
         self.create_navigation_buttons()
         self.create_product_section()
