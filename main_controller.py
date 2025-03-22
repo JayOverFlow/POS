@@ -7,7 +7,7 @@ class MainController(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("POS System")
-        self.geometry("800x400")
+        self.geometry("840x400")
 
         self.frames = {}
 

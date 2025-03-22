@@ -2,6 +2,23 @@ import tkinter.messagebox as messagebox
 from models.cashier_model import CashierModel
 
 class ProductController:
+    def __init__(self, view):
+        self.view = view
+
+    @staticmethod
+    def display_products(self):
+        # Fetch all the products
+        products = CashierModel.get_all_products()
+
+        # Categorize products using a dictionary
+        categorized_products = {"All": products}
+        for product in products:
+            category = product["category"].capitalize()
+            if category not in categorized_products:
+                categorized_products[category] = []
+            categorized_products[category].append(product)
+
+        self.view.display_all_products(categorized_products)
 
     @staticmethod
     def add_product(name, price, stock, category):
@@ -15,9 +32,7 @@ class ProductController:
     def get_all_products():
         products = CashierModel.get_all_products()
         if products:
-            for product in products:
-                # NOTE: Create the logic to display the products
-                print(product)
+            print("Products fetched")
         else:
             print("No products available.")
         return products
