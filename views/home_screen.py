@@ -29,15 +29,15 @@ class HomeScreen(tk.Frame):
 
         self.create_navigation_buttons()
         self.create_product_section()
-        self.create_cart()
+        # self.create_cart()
 
     # ---------------- Navigation Buttons ----------------
     def create_navigation_buttons(self):
         nav_frame = tk.Frame(self, bg="#FFFFFF", width=400, height=50)
         nav_frame.place(x=10, y=60)
 
-        ttk.Button(nav_frame, text="Home", command=lambda: self.show_frame("HomeScreen")).pack(side=tk.LEFT, padx=10)
-        ttk.Button(nav_frame, text="Inventory", command=lambda: self.show_frame("InventoryView")).pack(side=tk.LEFT, padx=10)
+        ttk.Button(nav_frame, text="Home", command=self.create_product_section).pack(side=tk.LEFT, padx=10)
+        ttk.Button(nav_frame, text="Inventory", command=self.create_add_product_frame).pack(side=tk.LEFT, padx=10)
         ttk.Button(nav_frame, text="Sales", command=lambda: self.show_frame("SalesView")).pack(side=tk.LEFT, padx=10)
 
     # ---------------- Product Section ----------------
@@ -65,6 +65,7 @@ class HomeScreen(tk.Frame):
         self.product_frame = tk.Frame(self.canvas_frame, bg="#F4F4F4")
         self.canvas_frame.create_window((0, 0), window=self.product_frame, anchor="nw")
 
+        self.create_cart()
         self.display_products("All")
 
     # ---------------- Display Products ----------------
@@ -98,8 +99,11 @@ class HomeScreen(tk.Frame):
             tk.Label(card, text=product['product_name'], font=("Arial", 12), bg="white").pack(pady=5)
             tk.Label(card, text=f"₱{product['product_price']}", font=("Arial", 10), bg="white").pack()
 
-            # Bind Click Event
-            card.bind("<Button-1>", lambda e, p=product: self.on_product_click(p))
+            # Bind Click Event for Product Management
+            if self.current_category == "Inventory":
+                card.bind("<Button-1>", lambda e, p=product: self.create_update_product_frame(p))
+            else:
+                card.bind("<Button-1>", lambda e, p=product: self.on_product_click(p))
 
         # Update Scroll Region
         self.product_frame.update_idletasks()
@@ -107,12 +111,17 @@ class HomeScreen(tk.Frame):
 
     # ---------------- Handle Product Click ----------------
     def on_product_click(self, product):
-        product_name = product['product_name']
-        if product_name in self.cart_items:
-            self.cart_items[product_name]['quantity'] += 1
+        if hasattr(self, 'add_product_frame') and self.add_product_frame.winfo_ismapped():
+            # Inventory Mode: Show Update Frame
+            self.show_update_product_frame(product)
         else:
-            self.cart_items[product_name] = {'product': product, 'quantity': 1}
-        self.update_cart_view()
+            # Cart Mode: Add to Cart
+            product_name = product['product_name']
+            if product_name in self.cart_items:
+                self.cart_items[product_name]['quantity'] += 1
+            else:
+                self.cart_items[product_name] = {'product': product, 'quantity': 1}
+            self.update_cart_view()
 
     # ---------------- Create Cart ----------------
     def create_cart(self):
@@ -310,6 +319,10 @@ class HomeScreen(tk.Frame):
 
     # ---------------- Update Cart View ----------------
     def update_cart_view(self):
+        # Ensure cart_tree exists before attempting to update it
+        if not hasattr(self, 'cart_tree') or not self.cart_tree.winfo_exists():
+            return
+
         for item in self.cart_tree.get_children():
             self.cart_tree.delete(item)
 
@@ -340,6 +353,125 @@ class HomeScreen(tk.Frame):
         self.discount_applied_label.config(text=f"Discount Applied: {discount_percentage:.2f}% (₱{discount_value:.2f})")
         self.total_payment_label.config(text=f"Total Payment: ₱{total_payment:.2f}")
 
+    def create_add_product_frame(self):
+        # Destroy Cart Frame if it exists
+        if hasattr(self, 'cart_frame'):
+            self.cart_frame.destroy()
+
+        # Create Inventory Frame
+        self.add_product_frame = tk.Frame(self, bg="#F4F4F4", width=310, height=185)
+        self.add_product_frame.place(x=520, y=205)
+        self.add_product_frame.pack_propagate(False)
+        self.add_product_frame.grid_propagate(False)
+
+        # Labels and Entry Widgets
+        tk.Label(self.add_product_frame, text="Product Name:", bg="#F4F4F4").grid(row=0, column=0, padx=5, pady=5)
+        self.product_name_entry = ttk.Entry(self.add_product_frame)
+        self.product_name_entry.grid(row=1, column=0, padx=5, pady=5)
+
+        tk.Label(self.add_product_frame, text="Price:", bg="#F4F4F4").grid(row=0, column=1, padx=5, pady=5)
+        self.product_price_entry = ttk.Entry(self.add_product_frame)
+        self.product_price_entry.grid(row=1, column=1, padx=5, pady=5)
+
+        tk.Label(self.add_product_frame, text="Category:", bg="#F4F4F4").grid(row=2, column=0, padx=5, pady=5)
+        self.category_var = tk.StringVar(value="Choose Category")
+        self.category_dropdown = ttk.Combobox(self.add_product_frame, textvariable=self.category_var,
+                                                  values=["Donuts", "Bread", "Cakes", "Sandwiches"], state="readonly")
+        self.category_dropdown.grid(row=3, column=0, padx=5, pady=5)
+
+        tk.Label(self.add_product_frame, text="Stock:", bg="#F4F4F4").grid(row=2, column=1, padx=5, pady=5)
+        self.product_stock_entry = ttk.Entry(self.add_product_frame)
+        self.product_stock_entry.grid(row=3, column=1, padx=5, pady=5)
+
+        # Add Product Button
+        tk.Button(self.add_product_frame, text="Add Product", command=self.add_product_to_database).grid(row=4,
+                                                                                                           column=0,
+                                                                                                           columnspan=2,
+                                                                                                           pady=10)
+
+    def add_product_to_database(self):
+        name = self.product_name_entry.get().strip()
+        price = self.product_price_entry.get().strip()
+        category = self.category_var.get().strip()
+        stock = self.product_stock_entry.get().strip()
+
+        if not name or not price or not stock or category == "Choose Category":
+            messagebox.showwarning("Invalid Input", "All fields are required.")
+            return
+
+        try:
+            price = Decimal(price)
+            stock = int(stock)
+            if price <= 0 or stock < 0:
+                raise ValueError
+        except ValueError:
+            messagebox.showerror("Invalid Input", "Enter a valid price and stock.")
+            return
+
+        # Call the ProductController to add product
+        if self.product_controller.add_product(name, price, category, stock):
+            messagebox.showinfo("Success", "Product added successfully!")
+            self.product_name_entry.delete(0, tk.END)
+            self.product_price_entry.delete(0, tk.END)
+            self.product_stock_entry.delete(0, tk.END)
+            self.category_var.set("Choose Category")
+        else:
+            messagebox.showerror("Error", "Failed to add product.")
+
+    def show_update_product_frame(self, product):
+        # Destroy any existing update frame to prevent duplicates
+        if hasattr(self, 'update_product_frame'):
+            self.update_product_frame.destroy()
+
+        # Create Update Product Frame
+        self.update_product_frame = tk.Frame(self, bg="#F8F8F8", width=310, height=185)
+        self.update_product_frame.place(x=520, y=10)
+        self.update_product_frame.pack_propagate(False)
+        self.update_product_frame.grid_propagate(False)
+
+        # Product Details
+        tk.Label(self.update_product_frame, text=product['product_name'], bg="#F8F8F8").grid(row=0, column=0, columnspan=2, pady=2)
+
+        # New Name Entry
+        tk.Label(self.update_product_frame, text="New Product Name:", bg="#F8F8F8").grid(row=1, column=0, padx=5, pady=5)
+        self.new_name_entry = ttk.Entry(self.update_product_frame)
+        self.new_name_entry.insert(0, product['product_name'])
+        self.new_name_entry.grid(row=2, column=0, padx=5, pady=5)
+
+        # Category Dropdown
+        tk.Label(self.update_product_frame, text="Category:", bg="#F8F8F8").grid(row=1, column=1, padx=5, pady=5)
+        self.update_category_var = tk.StringVar(value=product['product_category'].capitalize())
+        self.update_category_dropdown = ttk.Combobox(self.update_product_frame, textvariable=self.update_category_var,
+                                                     values=["Donuts", "Bread", "Cakes", "Sandwiches"],
+                                                     state="readonly")
+        self.update_category_dropdown.grid(row=2, column=1, padx=5, pady=5)
+
+        # Stock Entry
+        tk.Label(self.update_product_frame, text="Stock:", bg="#F8F8F8").grid(row=3, column=0, padx=5, pady=5)
+        self.update_stock_entry = ttk.Entry(self.update_product_frame)
+        self.update_stock_entry.insert(0, str(product['product_stock']))
+        self.update_stock_entry.grid(row=4, column=0, padx=5, pady=5)
+
+        # Price Entry
+        tk.Label(self.update_product_frame, text="Price:", bg="#F8F8F8").grid(row=3, column=1, padx=5, pady=5)
+        self.update_price_entry = ttk.Entry(self.update_product_frame)
+        self.update_price_entry.insert(0, str(product['product_price']))
+        self.update_price_entry.grid(row=4, column=1, padx=5, pady=5)
+
+        # Buttons
+        button_frame = tk.Frame(self.update_product_frame, bg="#F8F8F8")
+        button_frame.grid(row=5, column=0, columnspan=2, pady=5)
+
+        tk.Button(button_frame, text="Toss to Bin",
+                  command=lambda: self.product_controller.delete_product(product['product_id'])).pack(side=tk.LEFT, padx=10)
+        tk.Button(button_frame, text="Revise",
+                  command=lambda p=product: self.product_controller.update_product(
+                      p['product_id'],
+                      self.new_name_entry.get().strip(),
+                      self.update_category_var.get().strip(),
+                      self.update_stock_entry.get().strip(),
+                      self.update_price_entry.get().strip()
+                  )).pack(side=tk.RIGHT, padx=10)
 
 
 
