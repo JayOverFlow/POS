@@ -1,17 +1,23 @@
 import tkinter as tk
 from tkinter import ttk
-from controllers.product_controller import ProductController
 from tkinter import font, messagebox
 from pathlib import Path
 import ctypes
+from decimal import Decimal
+from datetime import datetime
+
+# Controllers
+from controllers.product_controller import ProductController
+from controllers.sales_controller import SalesController
 
 class HomeScreen(tk.Frame):
     def __init__(self, master, show_frame):
-        super().__init__(master, bg="red")
+        super().__init__(master, bg="#FFFFFF")
         self.master = master
         self.show_frame = show_frame
         self.current_category = 'All'
-        self.controller = ProductController(self)
+        self.product_controller = ProductController(self)
+        self.sales_controller = SalesController(self)
         self.cart_items = {}
 
         # Canvas
@@ -64,7 +70,7 @@ class HomeScreen(tk.Frame):
     # ---------------- Display Products ----------------
     def display_products(self, category):
         self.current_category = category
-        products = self.controller.get_all_products()
+        products = self.product_controller.get_all_products()
 
         # Filter Products by Category
         if category != "All":
@@ -118,23 +124,168 @@ class HomeScreen(tk.Frame):
         self.lbl.pack(side=tk.TOP)
 
         # Treeview for Cart
-        self.cart_tree = ttk.Treeview(self.cart_frame, columns=("Order", "-", "Quantity", "+", "Price", "Remove"), show="headings", height=10)
+        self.cart_tree = ttk.Treeview(self.cart_frame, columns=("Order", "-", "Quantity", "+", "Price", "Remove"),
+                                      show="headings", height=5)
         self.cart_tree.heading("Order", text="Order")
-        self.cart_tree.heading("-", text="-")
+        self.cart_tree.heading("-", text="")
         self.cart_tree.heading("Quantity", text="Quantity")
-        self.cart_tree.heading("+", text="+")
+        self.cart_tree.heading("+", text="")
         self.cart_tree.heading("Price", text="Price")
         self.cart_tree.heading("Remove", text="")
         self.cart_tree.pack(fill=tk.BOTH, expand=True)
 
-        self.cart_tree.column("Order", width=80, anchor=tk.CENTER)
-        self.cart_tree.column("-", width=30, anchor=tk.CENTER)
+        self.cart_tree.column("Order", width=100, anchor=tk.CENTER)
+        self.cart_tree.column("-", width=10, anchor=tk.CENTER)
         self.cart_tree.column("Quantity", width=60, anchor=tk.CENTER)
-        self.cart_tree.column("+", width=30, anchor=tk.CENTER)
+        self.cart_tree.column("+", width=10, anchor=tk.CENTER)
         self.cart_tree.column("Price", width=80, anchor=tk.CENTER)
         self.cart_tree.column("Remove", width=20, anchor=tk.CENTER)
 
         self.cart_tree.bind('<Button-1>', self.handle_cart_action)
+
+        # Mode of Payment Dropdown
+        self.payment_frame = tk.Frame(self.cart_frame, bg="#F4F4F4")
+        self.payment_frame.pack(side=tk.TOP, fill=tk.X, padx=10, pady=(10, 5))
+
+        tk.Label(self.payment_frame, text="Mode of Payment:", bg="#F4F4F4").pack(side=tk.LEFT)
+        self.payment_var = tk.StringVar(value="Cash or GCash")
+        self.payment_dropdown = ttk.Combobox(self.payment_frame, textvariable=self.payment_var,
+                                             values=["Cash", "Gcash"], state="readonly")
+        self.payment_dropdown.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=10)
+
+        # Discount Entry
+        self.discount_frame = tk.Frame(self.cart_frame, bg="#F4F4F4")
+        self.discount_frame.pack(side=tk.TOP, fill=tk.X, padx=10, pady=(0, 10))
+
+        tk.Label(self.discount_frame, text="Discount:", bg="#F4F4F4").pack(side=tk.LEFT)
+        self.discount_var = tk.StringVar(value="Apply Discount")
+        self.discount_entry = ttk.Entry(self.discount_frame, textvariable=self.discount_var)
+        self.discount_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=10)
+
+        def validate_discount_input(new_value):
+            if new_value == "" or new_value.replace(".", "", 1).isdigit():
+                return True
+            return False
+
+        validate_command = self.register(validate_discount_input)
+        self.discount_entry.config(validate="key", validatecommand=(validate_command, "%P"))
+
+        def clear_placeholder(event):
+            if self.discount_var.get() == "Apply Discount":
+                self.discount_var.set("")
+
+        def restore_placeholder(event):
+            if not self.discount_var.get():
+                self.discount_var.set("Apply Discount")
+
+        self.discount_entry.bind("<FocusIn>", clear_placeholder)
+        self.discount_entry.bind("<FocusOut>", restore_placeholder)
+        # Summary Frame
+        self.summary_frame = tk.Frame(self.cart_frame, bg="#F4F4F4")
+        self.summary_frame.pack(side=tk.TOP, fill=tk.X, padx=10, pady=10)
+
+        self.subtotal_label = tk.Label(self.summary_frame, text="Subtotal: ₱0.00", bg="#F4F4F4", font=("Arial", 10))
+        self.subtotal_label.pack(anchor="w")
+
+        self.discount_applied_label = tk.Label(self.summary_frame, text="Discount Applied: ₱0.00", bg="#F4F4F4",
+                                               font=("Arial", 10))
+        self.discount_applied_label.pack(anchor="w")
+
+        self.total_payment_label = tk.Label(self.summary_frame, text="Total Payment: ₱0.00", bg="#F4F4F4",
+                                            font=("Arial", 12, "bold"))
+        self.total_payment_label.pack(anchor="w")
+
+        self.discount_entry.bind("<KeyRelease>", lambda e: self.update_summary())
+        self.cart_tree.bind("<<TreeviewSelect>>", lambda e: self.update_summary())
+
+        # Buttons
+        self.button_frame = tk.Frame(self.cart_frame, bg="#F4F4F4")
+        self.button_frame.pack(side=tk.BOTTOM, fill=tk.X, padx=10, pady=10)
+
+        tk.Button(self.button_frame, text="Clear", command=self.clear_cart).pack(side=tk.LEFT, expand=True,
+                                                                                 fill=tk.BOTH, padx=5)
+        tk.Button(self.button_frame, text="Proceed", command=self.proceed_checkout).pack(side=tk.RIGHT, expand=True,
+                                                                                         fill=tk.BOTH, padx=5)
+
+    def clear_cart(self):
+        self.cart_items.clear()
+        self.update_cart_view()
+
+    # ---------------- Proceed Checkout ----------------
+    def proceed_checkout(self):
+        if self.payment_var.get() == "Cash or GCash":
+            messagebox.showwarning("Warning", "Please select a mode of payment before proceeding.")
+            return
+
+        if not self.cart_items:
+            messagebox.showwarning("Warning", "Your cart is empty. Please add items before proceeding.")
+            return
+
+        if not self.cart_items:
+            tk.messagebox.showwarning("Empty Cart", "Your cart is empty. Please add products before proceeding.")
+            return
+
+        # Create Receipt Frame
+        self.receipt_frame = tk.Frame(self, bg="#FFFFFF", width=310, height=380)
+        self.receipt_frame.place(x=520, y=10)
+        self.receipt_frame.pack_propagate(False)
+
+        # Date and Time
+        now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        tk.Label(self.receipt_frame, text=f"Date & Time: {now}", bg="#FFFFFF").pack(anchor="w")
+
+        # Receipt Treeview
+        receipt_tree = ttk.Treeview(self.receipt_frame, columns=("Unit", "Product Name", "Quantity", "Price"), show="headings", height=5)
+        receipt_tree.heading("Unit", text="Unit")
+        receipt_tree.heading("Product Name", text="Product Name")
+        receipt_tree.heading("Quantity", text="Quantity")
+        receipt_tree.heading("Price", text="Price")
+        receipt_tree.pack(fill=tk.BOTH, expand=True)
+
+        receipt_tree.column("Unit", width=30, anchor=tk.CENTER)
+        receipt_tree.column("Product Name", width=60, anchor=tk.CENTER)
+        receipt_tree.column("Quantity", width=30, anchor=tk.CENTER)
+        receipt_tree.column("Price", width=60, anchor=tk.CENTER)
+
+        # Populate Treeview
+        unit_count = 0
+        subtotal = Decimal(0)
+        for product_name, data in self.cart_items.items():
+            unit_count += 1
+            price = Decimal(data['product']['product_price']) * Decimal(data['quantity'])
+            subtotal += price
+            receipt_tree.insert('', 'end', values=(unit_count, product_name, data['quantity'], f"₱{price:.2f}"))
+
+        # Discount and Total Calculation
+        try:
+            discount_percentage = Decimal(self.discount_var.get()) if self.discount_var.get().replace('.', '',
+                                                                                                      1).isdigit() else Decimal(
+                0)
+            if discount_percentage > 100 or discount_percentage < 0:
+                raise ValueError("Invalid discount percentage")
+        except ValueError:
+            messagebox.showerror("Invalid Input", "Please enter a valid discount percentage (0-100).")
+            return
+
+        # Calculate the discount amount and total payment
+        discount_value = (subtotal * discount_percentage) / 100
+        total_payment = max(subtotal - discount_value, Decimal(0))
+
+        # Display Summary
+        tk.Label(self.receipt_frame, text=f"Subtotal: ₱{subtotal:.2f}", bg="#FFFFFF").pack(anchor="w")
+        tk.Label(self.receipt_frame,
+                 text=f"Discount Applied: {discount_percentage:.2f}% (₱{discount_value:.2f})",
+                 bg="#FFFFFF").pack(anchor="w")
+        tk.Label(self.receipt_frame, text=f"Total Payment: ₱{total_payment:.2f}", bg="#FFFFFF",
+                 font=("Arial", 12, "bold")).pack(anchor="w")
+
+        # Continue Button
+        tk.Button(self.receipt_frame, text="Continue", command=self.finalize_transaction).pack(side=tk.BOTTOM)
+
+    # ---------------- Finalize Transaction ----------------
+    def finalize_transaction(self):
+        payment_method = self.payment_var.get()
+        self.product_controller.finalize_transaction(payment_method, self.cart_items)
 
     # ---------------- Handle Cart Action ----------------
     def handle_cart_action(self, event):
@@ -166,4 +317,29 @@ class HomeScreen(tk.Frame):
             product = data['product']
             quantity = data['quantity']
             price = product['product_price'] * quantity
-            self.cart_tree.insert('', 'end', values=(product_name, "-", quantity, "+", f"₱{price}", "🗑️"))
+            self.cart_tree.insert('', 'end', values=(product_name, "-", quantity, "+", f"₱{price:.2f}", "🗑️"))
+
+        self.update_summary()
+
+    def update_summary(self):
+        subtotal = sum(
+            Decimal(str(data['product']['product_price'])) * data['quantity'] for data in self.cart_items.values())
+        try:
+            discount_percentage = Decimal(
+                str(self.discount_var.get())) if self.discount_var.get() and self.discount_var.get() != "Apply Discount" else Decimal(
+                "0.0")
+            if discount_percentage < 0 or discount_percentage > 100:
+                raise ValueError("Invalid discount percentage")
+        except (ValueError, ArithmeticError):
+            discount_percentage = Decimal("0.0")
+
+        discount_value = (subtotal * discount_percentage) / Decimal("100.0")
+        total_payment = max(subtotal - discount_value, Decimal("0.0"))
+
+        self.subtotal_label.config(text=f"Subtotal: ₱{subtotal:.2f}")
+        self.discount_applied_label.config(text=f"Discount Applied: {discount_percentage:.2f}% (₱{discount_value:.2f})")
+        self.total_payment_label.config(text=f"Total Payment: ₱{total_payment:.2f}")
+
+
+
+

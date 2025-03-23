@@ -1,32 +1,11 @@
 import tkinter.messagebox as messagebox
 from models.cashier_model import CashierModel
+from decimal import Decimal
 
 class ProductController:
+
     def __init__(self, view):
         self.view = view
-
-    @staticmethod
-    def display_products(self):
-        # Fetch all the products
-        products = CashierModel.get_all_products()
-
-        # Categorize products using a dictionary
-        categorized_products = {"All": products}
-        for product in products:
-            category = product["category"].capitalize()
-            if category not in categorized_products:
-                categorized_products[category] = []
-            categorized_products[category].append(product)
-
-        self.view.display_all_products(categorized_products)
-
-    @staticmethod
-    def add_product(name, price, stock, category):
-        if not name or price <= 0 or stock < 0:
-            print("Invalid product data. Please check the inputs.")
-            return False
-        CashierModel.add_product(name, price, stock, category)
-        return True
 
     @staticmethod
     def get_all_products():
@@ -37,20 +16,22 @@ class ProductController:
             print("No products available.")
         return products
 
-    @staticmethod
-    def update_product(product_id, name, price, stock, category):
-        if not name or price <= 0 or stock < 0:
-            print("Invalid product data. Please check the inputs.")
-            return False
-        CashierModel.update_product(product_id, name, price, stock, category)
-        return True
+    def finalize_transaction(self, payment_method, cart_items):
+        total_payment = sum(
+            Decimal(str(data['product']['product_price'])) * data['quantity']
+            for data in cart_items.values()
+        )
 
-    @staticmethod
-    def delete_product(product_id):
-        confirmation = messagebox.askyesno("Delete Product", f"Are you sure you want to delete product ID {product_id}?")
-        if confirmation:
-            CashierModel.delete_product(product_id)
-            print("Product deleted.")
-            return True
-        print("Operation canceled.")
-        return False
+        # Call the CashierModel to save the transaction
+        success = CashierModel.save_transaction(payment_method, total_payment, cart_items)
+
+        if success:
+            messagebox.showinfo("Success", "Transaction recorded successfully.")
+        else:
+            messagebox.showerror("Error", "Failed to record the transaction.")
+
+        self.view.cart_items.clear()
+        self.view.receipt_frame.destroy()
+        self.view.create_cart()
+        self.view.display_products("All")
+
