@@ -46,6 +46,17 @@ class HomeScreen(tk.Frame):
         nav_frame = tk.Frame(self, bg="#FFFFFF", width=400, height=50)
         nav_frame.place(x=10, y=60)
 
+        # Home Button
+        ctk.CTkButton(nav_frame,
+                      text="HOME",
+                      corner_radius=2,  # Rounded corners
+                      fg_color="#FFB2B3",  # Button background color
+                      text_color="black",  # Button text color
+                      width=100,  # Reduced button width
+                      height=10,  # Reduced button height
+                      command=self.create_product_section
+                      ).pack(side=tk.LEFT, padx=5)
+
         # Inventory Button
         ctk.CTkButton(nav_frame,
                       text="INVENTORY",
