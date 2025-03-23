@@ -28,8 +28,6 @@ class HomeScreen(tk.Frame):
         self.font1 = font.Font(family="Instrument Serif",weight="normal", size=40)
         self.font2 = font.Font(family="Instrument Serif", size=20)
 
-
-
         # Canvas
         self.canvas = tk.Canvas(self, bg="#FFFFFF")
         self.canvas.pack(fill=tk.BOTH, expand=True)
@@ -187,8 +185,9 @@ class HomeScreen(tk.Frame):
 
     # ---------------- Create Cart ----------------
     def create_cart(self):
-        self.cart_frame = tk.Frame(self, bg="#F4F4F4", width=310, height=380)
+        self.cart_frame = tk.Frame(self, bg="#F4F4F4", width=310, height=460)
         self.cart_frame.place(x=520, y=10)
+        self.cart_frame.pack_propagate(False)  # Prevent auto-resizing
 
         self.lbl = tk.Label(self.cart_frame, text="CART", font=self.font2)
         self.lbl.pack(side=tk.TOP)
@@ -327,14 +326,30 @@ class HomeScreen(tk.Frame):
         self.discount_entry.bind("<KeyRelease>", lambda e: self.update_summary())
         self.cart_tree.bind("<<TreeviewSelect>>", lambda e: self.update_summary())
 
-        # Buttons
-        self.button_frame = tk.Frame(self.cart_frame, bg="#F4F4F4")
-        self.button_frame.pack(side=tk.BOTTOM, fill=tk.X, padx=10, pady=10)
+        # Button Frame (For Clear and Proceed Buttons)
+        self.button_frame = ctk.CTkFrame(self.cart_frame, fg_color="#F4F4F4", height=100)
+        self.button_frame.pack(side=ctk.TOP, fill=ctk.X, padx=30, pady=(10, 5))  # Changed to TOP and adjusted pady
+        self.button_frame.pack_propagate(False)
 
-        tk.Button(self.button_frame, text="Clear", command=self.clear_cart).pack(side=tk.LEFT, expand=True,
-                                                                                 fill=tk.BOTH, padx=5)
-        tk.Button(self.button_frame, text="Proceed", command=self.proceed_checkout).pack(side=tk.RIGHT, expand=True,
-                                                                                         fill=tk.BOTH, padx=5)
+        # Clear Button (CTkButton)
+        self.clear_button = ctk.CTkButton(self.button_frame,
+                                          text="Clear",
+                                          fg_color="#FFB2B3",  # Background color
+                                          text_color="black",  # Text color
+                                          corner_radius=10,  # Rounded corners
+                                          width=100,  # Button width
+                                          command=self.clear_cart)
+        self.clear_button.pack(side=ctk.LEFT, padx=5)
+
+        # Proceed Button (CTkButton)
+        self.proceed_button = ctk.CTkButton(self.button_frame,
+                                            text="Proceed",
+                                            fg_color="#FF6F6F",  # Background color
+                                            text_color="white",  # Text color
+                                            corner_radius=10,  # Rounded corners
+                                            width=100,  # Button width
+                                            command=self.proceed_checkout)
+        self.proceed_button.pack(side=ctk.RIGHT, padx=5)
 
     def clear_cart(self):
         self.cart_items.clear()
