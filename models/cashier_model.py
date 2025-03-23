@@ -26,7 +26,7 @@ class CashierModel:
         query = "SELECT * FROM products_tbl"
         try:
             connection = Database.get_connection()
-            cursor = connection.cursor()
+            cursor = connection.cursor(dictionary=True)
             cursor.execute(query)
             products = cursor.fetchall()
             return products
