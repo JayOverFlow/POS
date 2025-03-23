@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import font, messagebox
 from pathlib import Path
+import customtkinter as ctk
 import ctypes
 
 
@@ -13,14 +14,25 @@ class HomeScreen(tk.Frame):
         self.show_frame = show_frame
         self.current_category = 'All'
 
-        print("sheeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+        BASE_DIR = Path(__file__).resolve().parent.parent
+        FONT_DIR = BASE_DIR / "static/fonts"
+        FONT_PATH = FONT_DIR / "instrumentserif-regular.ttf"
+
+        self.font1 = font.Font(family="Instrument Serif", size=40)
+        self.font2 = font.Font(family="Instrument Serif", size=30)
+        self.font3 = ctk.CTkFont(family="Instrument Serif", size=20)
+
+        try:
+            ctypes.windll.gdi32.AddFontResourceW(str(FONT_PATH))
+        except Exception as e:
+            print(f"Error loading font: {e}")
 
         # Canvas
         self.canvas = tk.Canvas(self, bg="#FFFFFF")
         self.canvas.pack(fill=tk.BOTH, expand=True)
 
         # Heading
-        self.canvas.create_text(350, 40, text="Cravings")
+        self.canvas.create_text(350, 30, text="Cravings", font=self.font1)
 
         self.create_navigation_buttons()
         self.create_product_section()
@@ -28,27 +40,54 @@ class HomeScreen(tk.Frame):
 
     # ---------------- Navigation Buttons ----------------
     def create_navigation_buttons(self):
+        # Create a navigation frame with a white background
         nav_frame = tk.Frame(self, bg="#FFFFFF", width=400, height=50)
-        # nav_frame.pack(side=tk.TOP, fill=tk.X)
         nav_frame.place(x=10, y=60)
 
-        ttk.Button(nav_frame, text="Home", command=lambda: self.show_frame("HomeScreen")).pack(side=tk.LEFT, padx=10)
-        ttk.Button(nav_frame, text="Inventory", command=lambda: self.show_frame("InventoryView")).pack(side=tk.LEFT, padx=10)
-        ttk.Button(nav_frame, text="Sales", command=lambda: self.show_frame("SalesView")).pack(side=tk.LEFT, padx=10)
+        # Button Configuration
+        buttons = [
+            ("Home", "HomeScreen"),
+            ("Inventory", "InventoryView"),
+            ("Sales", "SalesView")
+        ]
+
+        # Create CTkButtons with pink background
+        for text, frame in buttons:
+            button = ctk.CTkButton(nav_frame,
+                                   text=text,
+                                   command=lambda f=frame: self.show_frame(f),
+                                   fg_color="#FFB2B3",  # Background color
+                                   text_color="black",  # Button text color
+                                   width=80, height=25)  # Button size
+            button.pack(side="left", padx=10)
 
     # ---------------- Product Section ----------------
     def create_product_section(self):
-        self.product_section = tk.Frame(self, bg="#F4F4F4", width= 500, height=300)
+        # Product Section Container
+        self.product_section = tk.Frame(self, bg="#F4F4F4", width=500, height=300)
         self.product_section.place(x=10, y=90)
         self.product_section.pack_propagate(False)
 
-        # Create Category Buttons at the top of Product Section
+        # Category Buttons at the Top of Product Section
         categories = ["All", "Donuts", "Bread", "Cakes", "Sandwiches"]
         self.category_frame = tk.Frame(self.product_section, bg="#F4F4F4", width=200, height=100)
         self.category_frame.place(x=0, y=0)
 
         for category in categories:
-            tk.Button(self.category_frame, text=category, command=lambda c=category: self.display_products(c), bg="white").pack(side=tk.LEFT, padx=5)
+            # Apply underline using Unicode
+            underlined_text = ''.join(char + '\u0332' for char in category)
+
+            # Create a styled and smaller button with custom font
+            button = ctk.CTkButton(self.category_frame,
+                                   text=underlined_text,
+                                   command=lambda c=category: self.display_products(c),
+                                   fg_color="#F4F4F4",  # Transparent-like background
+                                   text_color="black",  # Text color
+                                   corner_radius=0,  # Square style
+                                   hover=False,  # Disable hover effect
+                                   width=80, height=30,  # Button size
+                                   font=self.font3)  # Use the custom CTkFont
+            button.pack(side="left", padx=10)  # Align horizontally with spacing
 
         # Product Display Area
         self.product_frame = tk.Frame(self.product_section, bg="#F4F4F4", width=490, height=270)
@@ -71,6 +110,6 @@ class HomeScreen(tk.Frame):
         self.cart_frame.place(x=520, y=10)
         self.cart_frame.pack_propagate(False)
 
-        self.lbl = tk.Label(self.cart_frame, text="CART")
+        self.lbl = tk.Label(self.cart_frame, text="Basket",font=self.font2)
         self.lbl.pack(side=tk.TOP)
 
