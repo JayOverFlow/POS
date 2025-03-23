@@ -1,6 +1,8 @@
 from models.Database import Database
 
 class CashierModel:
+    def __init__(self):
+        self.db = Database()
 
     # Product Management
     @staticmethod
@@ -23,9 +25,9 @@ class CashierModel:
 
     @staticmethod
     def get_all_products():
-        query = "SELECT * FROM products_tbl"
         try:
             connection = Database.get_connection()
+            query = "SELECT * FROM products_tbl"
             cursor = connection.cursor(dictionary=True)
             cursor.execute(query)
             products = cursor.fetchall()
@@ -73,21 +75,38 @@ class CashierModel:
 
     # Sales Management
     @staticmethod
-    def add_sale(total_amount, payment_method):
-        query = """
-                INSERT INTO sales_tbl (sale_total, sale_payment_method)
-                VALUES (%s, %s)
-            """
+    def save_transaction(payment_method, total_payment, cart_items):
         try:
             connection = Database.get_connection()
             cursor = connection.cursor()
-            cursor.execute(query, (total_amount, payment_method))
+
+            # Insert into sales_tbl
+            query = """
+                INSERT INTO sales_tbl (sale_total, sale_payment_method)
+                VALUES (%s, %s)
+            """
+            cursor.execute(query, (total_payment, payment_method))
+            sale_id = cursor.lastrowid
+
+            # Insert into sales_items
+            query = """
+                INSERT INTO sales_items (sale_id_fk, product_id_fk, sale_item_quantity, sale_item_subtotal)
+                VALUES (%s, %s, %s, %s)
+            """
+            for product_name, data in cart_items.items():
+                product_id = data['product']['product_id']
+                quantity = data['quantity']
+                subtotal = data['product']['product_price'] * quantity
+
+                cursor.execute(query, (sale_id, product_id, quantity, subtotal))
+
             connection.commit()
-            print("Sale recorded successfully.")
-            return cursor.lastrowid
+            print("Transaction saved successfully")
+            return True
         except Exception as e:
-            print(f"Error recording sale: {e}")
-            return None
+            print(f"Error saving transaction: {e}")
+            connection.rollback()
+            return False
         finally:
             cursor.close()
             connection.close()

@@ -12,7 +12,6 @@ def main():
 
     # Initialize database connection
     Database.initialize(db_config)
-    print("Application started.")
 
     # Start the main controller (it acts as the Tkinter root)
     app = MainController()
