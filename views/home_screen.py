@@ -81,6 +81,7 @@ class HomeScreen(tk.Frame):
 
     # ---------------- Product Section ----------------
     def create_product_section(self):
+        self.destroy_inventory_and_update_frames()
         self.product_section = tk.Frame(self, bg="#F4F4F4", width=500, height=300)
         self.product_section.place(x=10, y=90)
         self.product_section.pack_propagate(False)
@@ -127,6 +128,7 @@ class HomeScreen(tk.Frame):
 
     # ---------------- Display Products ----------------
     def display_products(self, category):
+        self.destroy_inventory_and_update_frames()
         self.current_category = category
         products = self.product_controller.get_all_products()
 
@@ -168,7 +170,10 @@ class HomeScreen(tk.Frame):
 
     # ---------------- Handle Product Click ----------------
     def on_product_click(self, product):
-        if hasattr(self, 'add_product_frame') and self.add_product_frame.winfo_ismapped():
+        # Ensure add_product_frame exists and is valid before checking if it is mapped
+        if (hasattr(self, 'add_product_frame') and
+                self.add_product_frame.winfo_exists() and
+                self.add_product_frame.winfo_ismapped()):
             # Inventory Mode: Show Update Frame
             self.show_update_product_frame(product)
         else:
@@ -337,13 +342,16 @@ class HomeScreen(tk.Frame):
 
     # ---------------- Proceed Checkout ----------------
     def proceed_checkout(self):
-        if self.payment_var.get() == "Cash or GCash":
-            messagebox.showwarning("Warning", "Please select a mode of payment before proceeding.")
+        selected_payment = self.payment_var.get()
+        if selected_payment not in ["Cash", "Gcash"]:
+            messagebox.showwarning("Warning", "Please select a valid mode of payment before proceeding.")
             return
 
         if not self.cart_items:
             messagebox.showwarning("Warning", "Your cart is empty. Please add items before proceeding.")
             return
+
+        self.cart_frame.destroy()
 
         # Create Receipt Frame
         self.receipt_frame = tk.Frame(self, bg="#FFFFFF", width=310, height=380)
@@ -625,6 +633,14 @@ class HomeScreen(tk.Frame):
                       self.update_stock_entry.get().strip(),
                       self.update_price_entry.get().strip()
                   )).pack(side=tk.RIGHT, padx=10)
+
+    def destroy_inventory_and_update_frames(self):
+        if hasattr(self, 'add_product_frame') and self.add_product_frame.winfo_exists():
+            self.add_product_frame.destroy()
+
+        if hasattr(self, 'update_product_frame') and self.update_product_frame.winfo_exists():
+            self.update_product_frame.destroy()
+
 
 
 
