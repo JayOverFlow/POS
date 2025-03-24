@@ -334,7 +334,7 @@ class HomeScreen(tk.Frame):
                                           text="Clear",
                                           fg_color="#FFB2B3",  # Background color
                                           text_color="black",  # Text color
-                                          corner_radius=10,  # Rounded corners
+                                          corner_radius=2,  # Rounded corners
                                           width=100,  # Button width
                                           command=self.clear_cart)
         self.clear_button.pack(side=ctk.LEFT, padx=5)
@@ -344,7 +344,7 @@ class HomeScreen(tk.Frame):
                                             text="Proceed",
                                             fg_color="#FF6F6F",  # Background color
                                             text_color="white",  # Text color
-                                            corner_radius=10,  # Rounded corners
+                                            corner_radius=2,  # Rounded corners
                                             width=100,  # Button width
                                             command=self.proceed_checkout)
         self.proceed_button.pack(side=ctk.RIGHT, padx=5)
@@ -367,21 +367,42 @@ class HomeScreen(tk.Frame):
         self.cart_frame.destroy()
 
         # Create Receipt Frame
-        self.receipt_frame = tk.Frame(self, bg="#FFFFFF", width=310, height=380)
+        self.receipt_frame = tk.Frame(self, bg="#FFE9E9", width=310, height=380,bd=5,relief="groove")
         self.receipt_frame.place(x=520, y=10)
         self.receipt_frame.pack_propagate(False)
 
         # Fonts
         small_font = font.Font(family="Instrument Sans", size=8)  # Smaller font for product names
-        heading_font = font.Font(family="Instrument Sans SemiBold", size=10)  # Heading font
+        heading_font = font.Font(family="Instrument Sans SemiBold", size=9)  # Heading font
 
         # Date and Time
         now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        tk.Label(self.receipt_frame, text=f"Date & Time: {now}", bg="#FFFFFF").pack(anchor="w")
+        tk.Label(self.receipt_frame, text=f"Date & Time: {now}", bg="#FFE9E9").pack(anchor="w")
 
         # Style Configuration
         style = ttk.Style()
-        style.configure("Treeview.Heading", font=heading_font)  # Apply bold font to headings
+
+        # Treeview Header Style (Transparent Border)
+        style.configure("Treeview.Heading",
+                        font=heading_font,  # Use the heading font
+                        background="#FDE0E0",  # Light pink header background
+                        foreground="black",  # Black header text
+                        relief="flat",  # Removes the border (flat style)
+                        borderwidth=0)  # Ensures no border
+
+        # Treeview Body Style (Transparent Border)
+        style.configure("Receipt.Treeview",
+                        background="#FFE9E9",  # Light gray row background
+                        foreground="black",  # Black row text
+                        rowheight=30,  # Increased row height for better spacing
+                        fieldbackground="white",  # Background of entry fields
+                        relief="flat",  # Removes the internal Treeview border
+                        borderwidth=0)  # Ensures no outer border
+
+        # Configure selected row style (for highlighting selected rows)
+        style.map("Receipt.Treeview",
+                  background=[("selected", "#FDE0E0")],  # Light pink when selected
+                  foreground=[("selected", "black")])  # Black text on selection
 
         # Receipt Treeview
         receipt_tree = ttk.Treeview(self.receipt_frame, columns=("Unit", "Product Name", "Quantity", "Price"),
@@ -431,15 +452,22 @@ class HomeScreen(tk.Frame):
         discount_value = (subtotal * discount_percentage) / 100
         total_payment = max(subtotal - discount_value, Decimal(0))
 
+        bottom_font = font.Font(family="Instrument Sans", size=12)
         # Display Summary
-        tk.Label(self.receipt_frame, text=f"Subtotal: ₱{subtotal:.2f}", bg="#FFFFFF").pack(anchor="w")
-        tk.Label(self.receipt_frame, text=f"Discount Applied: {discount_percentage:.2f}% (₱{discount_value:.2f})",
-                 bg="#FFFFFF").pack(anchor="w")
-        tk.Label(self.receipt_frame, text=f"Total Payment: ₱{total_payment:.2f}", bg="#FFFFFF",
-                 font=("Arial", 12, "bold")).pack(anchor="w")
+        tk.Label(self.receipt_frame, text=f"Subtotal: ₱{subtotal:.2f}",font=bottom_font, bg="#FFE9E9").pack(anchor="w")
+        tk.Label(self.receipt_frame, text=f"Discount Applied: {discount_percentage:.2f}% (₱{discount_value:.2f})",font=bottom_font,
+                 bg="#FFE9E9").pack(anchor="w")
+        tk.Label(self.receipt_frame, text=f"Total : ₱{total_payment:.2f}", bg="#FFE9E9",
+                 font=bottom_font).pack(anchor="w")
 
-        # Continue Button
-        tk.Button(self.receipt_frame, text="Continue", command=self.finalize_transaction).pack(side=tk.BOTTOM)
+        (ctk.CTkButton(self.receipt_frame,
+                      text="Continue",
+                      command=self.finalize_transaction,
+                      fg_color="#FFB2B3",  # Button background color
+                      hover_color="#FFE9E9",
+                      text_color="black",  # Text color
+                      corner_radius=2)
+         .pack(side=tk.BOTTOM, pady=10))
 
     # ---------------- Finalize Transaction ----------------
     def finalize_transaction(self):
