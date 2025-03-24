@@ -445,7 +445,7 @@ class HomeScreen(tk.Frame):
     # ---------------- Finalize Transaction ----------------
     def finalize_transaction(self):
         payment_method = self.payment_var.get()
-        self.product_controller.finalize_transaction(payment_method, self.cart_items)
+        self.sales_controller.finalize_transaction(payment_method, self.cart_items)
 
     # ---------------- Handle Cart Action ----------------
     def handle_cart_action(self, event):
