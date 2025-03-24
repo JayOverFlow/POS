@@ -126,7 +126,6 @@ class HomeScreen(tk.Frame):
 
     # ---------------- Display Products ----------------
     def display_products(self, category):
-        self.destroy_inventory_and_update_frames()
         self.current_category = category
         products = self.product_controller.get_all_products()
 
