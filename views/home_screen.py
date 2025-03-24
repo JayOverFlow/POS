@@ -865,7 +865,7 @@ class HomeScreen(tk.Frame):
             self.sale_receipt_frame.destroy()
 
         # Create Receipt Frame
-        self.sale_receipt_frame = tk.Frame(self, bg="#FFE9E9", width=300, height=300)
+        self.sale_receipt_frame = tk.Frame(self, bg="#FDE0E0", width=300, height=300)
         self.sale_receipt_frame.place(x=520, y=90)
         self.sale_receipt_frame.pack_propagate(False)
 
@@ -874,13 +874,21 @@ class HomeScreen(tk.Frame):
         sale_date = sale_timestamp.strftime('%m/%d/%Y')
         sale_time = sale_timestamp.strftime('%H:%M:%S')
 
-        tk.Label(self.sale_receipt_frame, text=f"Date: {sale_date}", bg="#FFE9E9").pack(anchor="w")
-        tk.Label(self.sale_receipt_frame, text=f"Time: {sale_time}", bg="#FFE9E9").pack(anchor="w")
+        tk.Label(self.sale_receipt_frame, text=f"Date: {sale_date}", bg="#FDE0E0").pack(anchor="w")
+        tk.Label(self.sale_receipt_frame, text=f"Time: {sale_time}", bg="#FDE0E0").pack(anchor="w")
 
         # Treeview for Sales Items
+        style = ttk.Style()
+        style.configure("Custom.Treeview",
+                        background="#FDE0E0",  # Background color for rows
+                        fieldbackground="#FDE0E0",  # Background color when editing
+                        foreground="black",  # Text color
+                        rowheight=25)  # Adjust row height for better appearance
+
         self.sales_receipt_tree = ttk.Treeview(self.sale_receipt_frame,
                                                columns=("Unit", "Product", "Quantity", "Price"),
-                                               show="headings")
+                                               show="headings",
+                                               style="Custom.Treeview")
 
         # Set Treeview Headings
         self.sales_receipt_tree.heading("Unit", text="Unit")
@@ -889,13 +897,14 @@ class HomeScreen(tk.Frame):
         self.sales_receipt_tree.heading("Price", text="Price")
         self.sales_receipt_tree.pack(fill=tk.BOTH, expand=True)
 
+        sale_font = font.Font(family="Instrument Sans", size=10)
+        # Total Label with Background Color
         tk.Label(
             self.sale_receipt_frame,
             text=f"Total: ₱{float(sale_data[2]):.2f}",
-            bg="#FFE9E9",
-            font=("Arial", 10, "bold")
+            bg="#FDE0E0",
+            font=sale_font
         ).pack(anchor="w")
-
 
         # Set Treeview Columns
         self.sales_receipt_tree.column("Unit", width=50, anchor=tk.CENTER)
@@ -911,4 +920,5 @@ class HomeScreen(tk.Frame):
                 row['sale_item_quantity'],
                 f"₱{row['product_price']:.2f}"
             ))
+
 
