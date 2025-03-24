@@ -37,8 +37,7 @@ class HomeScreen(tk.Frame):
 
         self.create_navigation_buttons()
         self.create_product_section()
-        # self.create_cart()
-
+        self.create_cart()
     # ---------------- Navigation Buttons ----------------
     def create_navigation_buttons(self):
         nav_frame = tk.Frame(self, bg="#FFFFFF", width=400, height=50)
@@ -52,7 +51,7 @@ class HomeScreen(tk.Frame):
                       text_color="black",  # Button text color
                       width=100,  # Reduced button width
                       height=10,  # Reduced button height
-                      command=self.create_product_section
+                      command=self.create_product_section and self.create_cart
                       ).pack(side=tk.LEFT, padx=5)
 
         # Inventory Button
@@ -74,7 +73,7 @@ class HomeScreen(tk.Frame):
                       text_color="black",  # Button text color
                       width=100,  # Reduced button width
                       height=10,  # Reduced button height
-                      command=lambda: self.show_frame("SalesView")
+                      command=self.create_sales_section
                       ).pack(side=tk.LEFT, padx=5)
 
     # ---------------- Product Section ----------------
@@ -121,7 +120,7 @@ class HomeScreen(tk.Frame):
         self.product_frame = ctk.CTkFrame(self.canvas_frame, fg_color="#F4F4F4")
         self.canvas_frame.create_window((0, 0), window=self.product_frame, anchor="nw")
 
-        self.create_cart()
+        # self.create_cart()
         self.display_products("All")
 
     # ---------------- Display Products ----------------
@@ -186,7 +185,7 @@ class HomeScreen(tk.Frame):
     def create_cart(self):
         self.cart_frame = tk.Frame(self, bg="#F4F4F4", width=310, height=460)
         self.cart_frame.place(x=520, y=10)
-        self.cart_frame.pack_propagate(False)  # Prevent auto-resizing
+        self.cart_frame.pack_propagate(False)
 
         self.lbl = tk.Label(self.cart_frame, text="CART", font=self.font2)
         self.lbl.pack(side=tk.TOP)
@@ -533,6 +532,14 @@ class HomeScreen(tk.Frame):
         if hasattr(self, 'cart_frame'):
             self.cart_frame.destroy()
 
+        if hasattr(self, 'sale_receipt_frame'):
+            self.sale_receipt_frame.destroy()
+
+        if hasattr(self, 'sales_tree'):
+            self.sales_tree.destroy()
+
+        self.create_product_section()
+
         # Create Inventory Frame
         self.add_product_frame = tk.Frame(self, bg="#F4F4F4", width=310, height=185)
         self.add_product_frame.place(x=520, y=205)
@@ -655,6 +662,109 @@ class HomeScreen(tk.Frame):
         if hasattr(self, 'update_product_frame') and self.update_product_frame.winfo_exists():
             self.update_product_frame.destroy()
 
+    def create_sales_section(self):
+        # Destroy Cart Frame if it exists
+        if hasattr(self, 'cart_frame'):
+            self.cart_frame.destroy()
+        self.destroy_inventory_and_update_frames()
+
+        self.sales_frame = tk.Frame(self, bg="#F4F4F4", width=500, height=300)
+        self.sales_frame.place(x=10, y=90)
+        self.sales_frame.pack_propagate(False)
+
+        # Treeview for Sales
+        self.sales_tree = ttk.Treeview(self.sales_frame,
+                                      columns=("Sale ID", "Payment", "Amount", "Date", "Time"),
+                                      show="headings")
+
+        # Set Treeview Headings
+        self.sales_tree.heading("Sale ID", text="Sale ID")
+        self.sales_tree.heading("Payment", text="Payment")
+        self.sales_tree.heading("Amount", text="Amount")
+        self.sales_tree.heading("Date", text="Date")
+        self.sales_tree.heading("Time", text="Time")
+        self.sales_tree.pack(fill=tk.BOTH, expand=True)
+
+        # Set Treeview Columns
+        self.sales_tree.column("Sale ID", width=100, anchor=tk.CENTER)
+        self.sales_tree.column("Payment", width=100, anchor=tk.CENTER)
+        self.sales_tree.column("Amount", width=100, anchor=tk.CENTER)
+        self.sales_tree.column("Date", width=100, anchor=tk.CENTER)
+        self.sales_tree.column("Time", width=100, anchor=tk.CENTER)
+
+        self.display_sales()
+
+        self.sales_tree.bind('<Button-1>', self.handle_sale_click)
+
+    def display_sales(self):
+        self.sales_controller.display_sales()
+
+    def handle_sale_click(self, event):
+        # Get the selected item
+        sale_record = self.sales_tree.selection()
+        if not sale_record:
+            return
+
+        sale_data = self.sales_tree.item(sale_record)['values']
+        if not sale_data:
+            return
+
+        sale_id = sale_data[0]
+        sale_receipt_data = self.sales_controller.display_sale_receipt(sale_id)
+
+        if not sale_receipt_data:
+            messagebox.showerror("Error", "Failed to retrieve sale details.")
+            return
+
+        # Destroy previous receipt frame if it exists
+        if hasattr(self, 'sale_receipt_frame'):
+            self.sale_receipt_frame.destroy()
+
+        # Create Receipt Frame
+        self.sale_receipt_frame = tk.Frame(self, bg="#FFE9E9", width=300, height=300)
+        self.sale_receipt_frame.place(x=520, y=90)
+        self.sale_receipt_frame.pack_propagate(False)
+
+        # Display Date and Time (Assuming the first row contains the timestamp and total)
+        sale_timestamp = sale_receipt_data[0]['sale_timestamp']
+        sale_date = sale_timestamp.strftime('%m/%d/%Y')
+        sale_time = sale_timestamp.strftime('%H:%M:%S')
+
+        tk.Label(self.sale_receipt_frame, text=f"Date: {sale_date}", bg="#FFE9E9").pack(anchor="w")
+        tk.Label(self.sale_receipt_frame, text=f"Time: {sale_time}", bg="#FFE9E9").pack(anchor="w")
+
+        # Treeview for Sales Items
+        self.sales_receipt_tree = ttk.Treeview(self.sale_receipt_frame,
+                                               columns=("Unit", "Product", "Quantity", "Price"),
+                                               show="headings")
+
+        # Set Treeview Headings
+        self.sales_receipt_tree.heading("Unit", text="Unit")
+        self.sales_receipt_tree.heading("Product", text="Product")
+        self.sales_receipt_tree.heading("Quantity", text="Quantity")
+        self.sales_receipt_tree.heading("Price", text="Price")
+        self.sales_receipt_tree.pack(fill=tk.BOTH, expand=True)
+
+        tk.Label(
+            self.sale_receipt_frame,
+            text=f"Total: ₱{float(sale_data[2]):.2f}",
+            bg="#FFE9E9",
+            font=("Arial", 10, "bold")
+        ).pack(anchor="w")
 
 
+        # Set Treeview Columns
+        self.sales_receipt_tree.column("Unit", width=50, anchor=tk.CENTER)
+        self.sales_receipt_tree.column("Product", width=80, anchor=tk.CENTER)
+        self.sales_receipt_tree.column("Quantity", width=80, anchor=tk.CENTER)
+        self.sales_receipt_tree.column("Price", width=80, anchor=tk.CENTER)
+
+        # Populate Treeview with Sales Items
+        for index, row in enumerate(sale_receipt_data):
+            self.sales_receipt_tree.insert('', 'end', values=(
+                index + 1,
+                row['product_name'],
+                row['sale_item_quantity'],
+                f"₱{row['product_price']:.2f}"
+            ))
 

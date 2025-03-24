@@ -113,3 +113,46 @@ class CashierModel:
         finally:
             cursor.close()
             connection.close()
+
+    @staticmethod
+    def get_all_sales():
+        try:
+            connection = Database.get_connection()
+            query = "SELECT * FROM sales_tbl"
+            cursor = connection.cursor(dictionary=True)
+            cursor.execute(query)
+            sales = cursor.fetchall()
+            return sales
+        except Exception as e:
+            print(f"Error fetching sales: {e}")
+            return []
+        finally:
+            cursor.close()
+            connection.close()
+
+    @staticmethod
+    def get_sale_receipt(sale_id):
+        try:
+            connection = Database.get_connection()
+            query = """
+            SELECT 
+    s.sale_timestamp,
+    p.product_name,
+    si.sale_item_quantity,
+    p.product_price,
+    s.sale_total
+FROM sales_tbl s
+JOIN sales_items si ON s.sale_id = si.sale_id_fk
+JOIN products_tbl p ON si.product_id_fk = p.product_id
+WHERE s.sale_id = %s;
+            """
+            cursor = connection.cursor(dictionary=True)
+            cursor.execute(query, (sale_id,))
+            sales_receipt = cursor.fetchall()
+            return sales_receipt
+        except Exception as e:
+            print(f"Error fetching sales: {e}")
+            return []
+        finally:
+            cursor.close()
+            connection.close()

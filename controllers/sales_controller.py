@@ -26,3 +26,29 @@ class SalesController:
         self.view.create_cart()
         self.view.display_products("All")
 
+    def display_sales(self):
+        sales = CashierModel.get_all_sales()
+
+        if not sales:
+            return None
+
+        for sale in sales:
+            sale_timestamp = sale['sale_timestamp']
+
+            if isinstance(sale_timestamp, str):
+                # If timestamp is a string, parse it to a datetime object
+                sale_timestamp = datetime.strptime(sale_timestamp, '%Y-%m-%d %H:%M:%S')
+
+            # Extract and format Date
+            sale_date = sale_timestamp.strftime('%m/%d/%Y')
+
+            # Extract and format Time
+            sale_time = sale_timestamp.strftime('%H:%M:%S')
+
+            # Insert into Treeview
+            self.view.sales_tree.insert('', 'end', values=(
+            sale['sale_id'], sale['sale_payment_method'], sale['sale_total'], sale_date, sale_time))
+
+    def display_sale_receipt(self, sale_id):
+        return CashierModel.get_sale_receipt(sale_id)
+
