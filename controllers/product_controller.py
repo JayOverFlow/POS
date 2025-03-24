@@ -11,6 +11,7 @@ class ProductController:
         success = CashierModel.add_product(name, price, category, stock)
         if success:
             self.view.display_products("All")  # Refresh product display if needed
+            self.view.create_add_product_frame()
             return True
         else:
             return False
@@ -73,7 +74,8 @@ class ProductController:
         # Perform Update
         if CashierModel.update_product(product_id, new_name, new_category, new_stock, new_price):
             messagebox.showinfo("Success", "Product updated successfully!")
-            self.view.display_products("All")
+            self.view.display_products("All")  # Refresh product display if needed
+            self.view.create_add_product_frame()
         else:
             messagebox.showerror("Error", "Failed to update product. Please try again.")
 
@@ -81,6 +83,7 @@ class ProductController:
         if messagebox.askyesno("Confirm Deletion", "Are you sure you want to delete this product?"):
             if CashierModel.delete_product(product_id):
                 messagebox.showinfo("Success", "Product deleted successfully!")
-                self.view.display_products(self.view.current_category)
+                self.view.display_products("All")  # Refresh product display if needed
+                self.view.create_add_product_frame()
             else:
                 messagebox.showerror("Error", "Failed to delete the product.")
