@@ -46,33 +46,33 @@ class HomeScreen(tk.Frame):
         # Home Button
         ctk.CTkButton(nav_frame,
                       text="HOME",
-                      corner_radius=2,  # Rounded corners
-                      fg_color="#FFB2B3",  # Button background color
-                      text_color="black",  # Button text color
-                      width=100,  # Reduced button width
-                      height=10,  # Reduced button height
+                      corner_radius=2,
+                      fg_color="#FFB2B3",
+                      text_color="black",
+                      width=100,
+                      height=10,
                       command=self.create_product_section and self.create_cart
                       ).pack(side=tk.LEFT, padx=5)
 
         # Inventory Button
         ctk.CTkButton(nav_frame,
                       text="INVENTORY",
-                      corner_radius=2,  # Rounded corners
-                      fg_color="#FFB2B3",  # Button background color
-                      text_color="black",  # Button text color
-                      width=100,  # Reduced button width
-                      height=10,  # Reduced button height
+                      corner_radius=2,
+                      fg_color="#FFB2B3",
+                      text_color="black",
+                      width=100,
+                      height=10,
                       command=self.create_add_product_frame
                       ).pack(side=tk.LEFT, padx=5)
 
         # Sales Button
         ctk.CTkButton(nav_frame,
                       text="SALES",
-                      corner_radius=2,  # Rounded corners
-                      fg_color="#FFB2B3",  # Button background color
-                      text_color="black",  # Button text color
-                      width=100,  # Reduced button width
-                      height=10,  # Reduced button height
+                      corner_radius=2,
+                      fg_color="#FFB2B3",
+                      text_color="black",
+                      width=100,
+                      height=10,
                       command=self.create_sales_section
                       ).pack(side=tk.LEFT, padx=5)
 
@@ -96,12 +96,12 @@ class HomeScreen(tk.Frame):
                 self.category_frame,
                 text=category,
                 command=lambda c=category: self.display_products(c),
-                fg_color="#F4F4F4",  # True transparency
-                text_color="black",  # Text color
-                font=underline_font,  # Underlined font
-                corner_radius=0,  # No rounded corners
-                border_width=0,  # No border
-                width=90,  # Smaller width
+                fg_color="#F4F4F4",
+                text_color="black",
+                font=underline_font,
+                corner_radius=0,
+                border_width=0,
+                width=90,
             ).pack(side=ctk.LEFT, padx=5)
 
         # Create Scrollable Product Area
@@ -109,12 +109,11 @@ class HomeScreen(tk.Frame):
                                           highlightthickness=0)
         self.canvas_frame.place(x=5, y=50)
 
-        # Increased width for the scrollbar (thicker appearance)
         self.scrollbar = ctk.CTkScrollbar(self.product_section,
                                           orientation="vertical",
                                           command=self.canvas_frame.yview,
                                           height=250,
-                                          width=20)  # Adjust the width for thickness
+                                          width=20)
         self.scrollbar.place(x=495, y=50)
 
         self.canvas_frame.configure(yscrollcommand=self.scrollbar.set)
@@ -123,7 +122,6 @@ class HomeScreen(tk.Frame):
         self.product_frame = ctk.CTkFrame(self.canvas_frame, fg_color="#F4F4F4")
         self.canvas_frame.create_window((0, 0), window=self.product_frame, anchor="nw")
 
-        # self.create_cart()
         self.display_products("All")
 
     # ---------------- Display Products ----------------
@@ -193,8 +191,8 @@ class HomeScreen(tk.Frame):
         self.lbl = tk.Label(self.cart_frame, text="CART", font=self.font2)
         self.lbl.pack(side=tk.TOP)
 
-        heading_font = font.Font(family="Inter Light", size=10)  # Heading font
-        font1 = font.Font(family="Instrument Sans SemiBold", size=10)  # Input font
+        heading_font = font.Font(family="Inter Light", size=10)
+        font1 = font.Font(family="Instrument Sans SemiBold", size=10)
 
         # Style Configuration
         style = ttk.Style()
@@ -335,20 +333,20 @@ class HomeScreen(tk.Frame):
         # Clear Button (CTkButton)
         self.clear_button = ctk.CTkButton(self.button_frame,
                                           text="Clear",
-                                          fg_color="#FFB2B3",  # Background color
-                                          text_color="black",  # Text color
-                                          corner_radius=2,  # Rounded corners
-                                          width=100,  # Button width
+                                          fg_color="#FFB2B3",
+                                          text_color="black",
+                                          corner_radius=2,
+                                          width=100,
                                           command=self.clear_cart)
         self.clear_button.pack(side=ctk.LEFT, padx=5)
 
         # Proceed Button (CTkButton)
         self.proceed_button = ctk.CTkButton(self.button_frame,
                                             text="Proceed",
-                                            fg_color="#FF6F6F",  # Background color
-                                            text_color="white",  # Text color
-                                            corner_radius=2,  # Rounded corners
-                                            width=100,  # Button width
+                                            fg_color="#FF6F6F",
+                                            text_color="white",
+                                            corner_radius=2,
+                                            width=100,
                                             command=self.proceed_checkout)
         self.proceed_button.pack(side=ctk.RIGHT, padx=5)
 
@@ -375,8 +373,8 @@ class HomeScreen(tk.Frame):
         self.receipt_frame.pack_propagate(False)
 
         # Fonts
-        small_font = font.Font(family="Instrument Sans", size=8)  # Smaller font for product names
-        heading_font = font.Font(family="Instrument Sans SemiBold", size=9)  # Heading font
+        small_font = font.Font(family="Instrument Sans", size=8)
+        heading_font = font.Font(family="Instrument Sans SemiBold", size=9,weight="bold")
 
         # Date and Time
         now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -385,27 +383,26 @@ class HomeScreen(tk.Frame):
         # Style Configuration
         style = ttk.Style()
 
-        # Treeview Header Style (Transparent Border)
+        # Treeview Header Style
         style.configure("Treeview.Heading",
-                        font=heading_font,  # Use the heading font
-                        background="#FDE0E0",  # Light pink header background
-                        foreground="black",  # Black header text
-                        relief="flat",  # Removes the border (flat style)
-                        borderwidth=0)  # Ensures no border
+                        font=heading_font,
+                        background="#FDE0E0",
+                        foreground="black",
+                        relief="flat",
+                        borderwidth=0)
 
         # Treeview Body Style (Transparent Border)
         style.configure("Receipt.Treeview",
-                        background="#FFE9E9",  # Light gray row background
-                        foreground="black",  # Black row text
-                        rowheight=30,  # Increased row height for better spacing
-                        fieldbackground="white",  # Background of entry fields
-                        relief="flat",  # Removes the internal Treeview border
-                        borderwidth=0)  # Ensures no outer border
+                        background="#FFE9E9",
+                        foreground="black",
+                        rowheight=30,
+                        fieldbackground="white",
+                        relief="flat",
+                        borderwidth=0)
 
-        # Configure selected row style (for highlighting selected rows)
+        # Configure selected row style
         style.map("Receipt.Treeview",
-                  background=[("selected", "#FDE0E0")],  # Light pink when selected
-                  foreground=[("selected", "black")])  # Black text on selection
+                  background=[("selected", "#FDE0E0")]) # Light pink when selected
 
         # Receipt Treeview
         receipt_tree = ttk.Treeview(self.receipt_frame, columns=("Unit", "Product Name", "Quantity", "Price"),
@@ -426,7 +423,7 @@ class HomeScreen(tk.Frame):
         receipt_tree.configure(style="Receipt.Treeview")
 
         # Configure the small font tag
-        receipt_tree.tag_configure("small_font", font=small_font)  # Apply the smaller font to product names
+        receipt_tree.tag_configure("small_font", font=small_font)
 
         # Populate Treeview
         unit_count = 0
@@ -455,7 +452,7 @@ class HomeScreen(tk.Frame):
         discount_value = (subtotal * discount_percentage) / 100
         total_payment = max(subtotal - discount_value, Decimal(0))
 
-        bottom_font = font.Font(family="Instrument Sans", size=12)
+        bottom_font = font.Font(family="Instrument Sans", size=12,weight="bold")
         # Display Summary
         tk.Label(self.receipt_frame, text=f"Subtotal: ₱{subtotal:.2f}",font=bottom_font, bg="#FFE9E9").pack(anchor="w")
         tk.Label(self.receipt_frame, text=f"Discount Applied: {discount_percentage:.2f}% (₱{discount_value:.2f})",font=bottom_font,
@@ -463,12 +460,14 @@ class HomeScreen(tk.Frame):
         tk.Label(self.receipt_frame, text=f"Total : ₱{total_payment:.2f}", bg="#FFE9E9",
                  font=bottom_font).pack(anchor="w")
 
+        button_font = ctk.CTkFont(family="Instrument Sans", size=15,weight="bold")
         (ctk.CTkButton(self.receipt_frame,
                       text="Continue",
+                       font=button_font,
                       command=self.finalize_transaction,
-                      fg_color="#FFB2B3",  # Button background color
+                      fg_color="#FFB2B3",
                       hover_color="#FFE9E9",
-                      text_color="black",  # Text color
+                      text_color="black",
                       corner_radius=2)
          .pack(side=tk.BOTTOM, pady=10))
 
@@ -505,8 +504,8 @@ class HomeScreen(tk.Frame):
             return
 
         # Define fonts for the Treeview
-        cart_font = font.Font(family="Instrument Sans", weight="bold", size=10)  # General font
-        small_font = font.Font(family="Instrument Sans SemiBold", size=8)  # Smaller font for product names
+        cart_font = font.Font(family="Instrument Sans", weight="bold", size=10)
+        small_font = font.Font(family="Instrument Sans SemiBold", size=8)
 
         # Apply the custom font to the Treeview via a style
         style = ttk.Style()
@@ -576,23 +575,23 @@ class HomeScreen(tk.Frame):
         self.add_product_frame.place(x=520, y=205)
         self.add_product_frame.pack_propagate(False)
         self.add_product_frame.grid_propagate(False)
-        add_product_font = font.Font(family="Instrument Sans SemiBold", size=8)
+        add_product_font = font.Font(family="Instrument Sans SemiBold", size=8,weight="bold")
+
         # Style Configuration (for Colored Entry and Combobox)
         style = ttk.Style()
-
-        # Custom Entry Style (Colored)
+        # Custom Entry Style
         style.configure("Custom.TEntry",
-                        fieldbackground="#FFF3CD",  # Entry background
-                        foreground="black",  # Entry text color
-                        borderwidth=1,  # Border width
-                        padding=(5, 3))  # Padding for size control
+                        fieldbackground="#FFF3CD",
+                        foreground="black",
+                        borderwidth=1,
+                        padding=(5, 3))
 
         # Custom Combobox Style (Colored)
         style.configure("Custom.TCombobox",
-                        fieldbackground="#FDE0E0",  # Background color
-                        background="#FDE0E0",  # Dropdown background
-                        foreground="black",  # Text color
-                        borderwidth=1,  # Border width
+                        fieldbackground="#FDE0E0",
+                        background="#FDE0E0",
+                        foreground="black",
+                        borderwidth=1,
                         padding=(5, 3))
 
         # Labels and Entry Widgets
@@ -627,9 +626,9 @@ class HomeScreen(tk.Frame):
                       text="Bake",
                       command=self.add_product_to_database,
                       fg_color="#FFB2B3",
-                      text_color="black",  # Text Color
-                      corner_radius=2   ,  # Rounded Corners
-                      width=130,  # Button Width
+                      text_color="black",
+                      corner_radius=2,
+                      width=130,
                       height=20
                       ).grid(row=4, column=0, columnspan=2, pady=10)
 
@@ -680,10 +679,10 @@ class HomeScreen(tk.Frame):
 
         # Customize Entry widgets (Reduced Size)
         style.configure("Custom.TEntry",
-                        fieldbackground="#FFF3CD",  # Background color
-                        background="#FFF3CD",  # Background (for older versions)
-                        foreground="black",  # Text color
-                        padding=(3, 1))  # (Width, Height) - Reduced size
+                        fieldbackground="#FFF3CD",
+                        background="#FFF3CD",
+                        foreground="black",
+                        padding=(3, 1))
 
         # Payment Dropdown Styling (Reduced Size)
         style.configure("Custom.TCombobox",
@@ -692,7 +691,7 @@ class HomeScreen(tk.Frame):
                         foreground="#8A8A8A",
                         borderwidth=1,
                         relief="solid",
-                        padding=(3, 1))  # Reduced size (smaller dropdown height)
+                        padding=(3, 1))
 
         # Customize the dropdown when readonly
         style.map("Custom.TCombobox",
@@ -749,12 +748,11 @@ class HomeScreen(tk.Frame):
         ctk.CTkButton(button_frame,
                       text="Toss to Bin",
                       command=lambda: self.product_controller.delete_product(product['product_id']),
-                      fg_color="#FDE0E0",  # Light pink background
-                      hover_color="#E5533C",  # Darker red (hover effect)
-                      text_color="black",  # Black text
-                      corner_radius=2,  # Less rounded corners
-                      width=60,  # Reduced width
-                      height=15  # Reduced height
+                      fg_color="#FDE0E0",
+                      text_color="black",
+                      corner_radius=2,
+                      width=60,
+                      height=15
                       ).pack(side=tk.LEFT, padx=5)
 
         # Revise Button (Smaller size)
@@ -767,11 +765,10 @@ class HomeScreen(tk.Frame):
                           self.update_stock_entry.get().strip(),
                           self.update_price_entry.get().strip()
                       ),
-                      fg_color="#FFB2B3",  # Light red background
-                      hover_color="#36648B",  # Darker blue (hover effect)
-                      text_color="black",  # Black text
-                      corner_radius=2,  # Less rounded corners
-                      height=15  # Reduced height
+                      fg_color="#FFB2B3",
+                      text_color="black",
+                      corner_radius=2,
+                      height=15
                       ).pack(side=tk.RIGHT, padx=10)
 
     def destroy_inventory_and_update_frames(self):
@@ -796,26 +793,27 @@ class HomeScreen(tk.Frame):
         # Treeview for Sales
         style = ttk.Style()
 
-        # Configure Treeview Header
+        # Configure Treeview Header (Font for Headings)
         style.configure("Sales.Treeview.Heading",
                         font=sales_font,
-                        background="#FDE0E0",  # Soft pink background
-                        foreground="black",  # Black text
-                        relief="flat")  # Flat header
+                        background="#FDE0E0",
+                        foreground="black",
+                        relief="flat")
 
-        # Configure Treeview Rows
+        # Configure Treeview Rows (Font for Data)
         style.configure("Sales.Treeview",
                         font=sales_item_font,
-                        background="#F8F8F8",  # Light grey rows
-                        foreground="black",  # Black text
-                        rowheight=20,  # Taller rows for better appearance
+                        background="#F8F8F8",
+                        foreground="black",
+                        rowheight=25,
                         fieldbackground="#F8F8F8")
 
         # Highlighted Row (when selected)
         style.map("Sales.Treeview",
-                  background=[("selected", "#FAD2D2")],  # Soft red on selection
+                  background=[("selected", "#FAD2D2")],
                   foreground=[("selected", "black")])
 
+        # Create the Sales Treeview
         self.sales_tree = ttk.Treeview(self.sales_frame,
                                        columns=("Sale ID", "Payment", "Amount", "Date", "Time"),
                                        show="headings",
@@ -829,15 +827,17 @@ class HomeScreen(tk.Frame):
         self.sales_tree.heading("Time", text="Time")
         self.sales_tree.pack(fill=tk.BOTH, expand=True)
 
-        # Set Treeview Columns
+        # Set Treeview Columns (Alignment and Width)
         self.sales_tree.column("Sale ID", width=100, anchor=tk.CENTER)
         self.sales_tree.column("Payment", width=100, anchor=tk.CENTER)
         self.sales_tree.column("Amount", width=100, anchor=tk.CENTER)
         self.sales_tree.column("Date", width=100, anchor=tk.CENTER)
         self.sales_tree.column("Time", width=100, anchor=tk.CENTER)
 
+        # Display Sales Data
         self.display_sales()
 
+        # Bind Click Event
         self.sales_tree.bind('<Button-1>', self.handle_sale_click)
 
     def display_sales(self):
@@ -865,7 +865,7 @@ class HomeScreen(tk.Frame):
             self.sale_receipt_frame.destroy()
 
         # Create Receipt Frame
-        self.sale_receipt_frame = tk.Frame(self, bg="#FDE0E0", width=300, height=300)
+        self.sale_receipt_frame = tk.Frame(self, bg="#FDE0E0", width=300, height=350)
         self.sale_receipt_frame.place(x=520, y=90)
         self.sale_receipt_frame.pack_propagate(False)
 
@@ -876,37 +876,47 @@ class HomeScreen(tk.Frame):
 
         tk.Label(self.sale_receipt_frame, text=f"Date: {sale_date}", bg="#FDE0E0").pack(anchor="w")
         tk.Label(self.sale_receipt_frame, text=f"Time: {sale_time}", bg="#FDE0E0").pack(anchor="w")
-
         # Treeview for Sales Items
         style = ttk.Style()
+        sales_font = font.Font(family="Instrument Serif", size=12)
+        # Configure Treeview Rows (Body)
         style.configure("Custom.Treeview",
-                        background="#FDE0E0",  # Background color for rows
-                        fieldbackground="#FDE0E0",  # Background color when editing
-                        foreground="black",  # Text color
-                        rowheight=25)  # Adjust row height for better appearance
+                        background="#FFE9E9",
+                        fieldbackground="#FFE9E9",
+                        font=sales_font,
+                        foreground="black",
+                        rowheight=25)
+        # Configure Treeview Header (Column Headers)
+        style.configure("Custom.Treeview.Heading",
+                        background="#FDE0E0",
+                        foreground="black",
+                        font=sales_font,
+                        relief="flat")
 
         self.sales_receipt_tree = ttk.Treeview(self.sale_receipt_frame,
                                                columns=("Unit", "Product", "Quantity", "Price"),
                                                show="headings",
                                                style="Custom.Treeview")
 
-        # Set Treeview Headings
+        # Set Treeview Headings (with styled headers)
         self.sales_receipt_tree.heading("Unit", text="Unit")
         self.sales_receipt_tree.heading("Product", text="Product")
         self.sales_receipt_tree.heading("Quantity", text="Quantity")
         self.sales_receipt_tree.heading("Price", text="Price")
         self.sales_receipt_tree.pack(fill=tk.BOTH, expand=True)
 
-        sale_font = font.Font(family="Instrument Sans", size=10)
-        # Total Label with Background Color
+        # Total Label
+        sale_font = font.Font(family="Instrument Sans", size=10, weight="bold")
         tk.Label(
             self.sale_receipt_frame,
             text=f"Total: ₱{float(sale_data[2]):.2f}",
             bg="#FDE0E0",
-            font=sale_font
-        ).pack(anchor="w")
+            font=sale_font,
+            padx=10,
+            pady=5
+        ).pack(side="bottom", anchor="w", before=self.sales_receipt_tree)
 
-        # Set Treeview Columns
+        # Set Treeview Columns (width and alignment)
         self.sales_receipt_tree.column("Unit", width=50, anchor=tk.CENTER)
         self.sales_receipt_tree.column("Product", width=80, anchor=tk.CENTER)
         self.sales_receipt_tree.column("Quantity", width=80, anchor=tk.CENTER)
@@ -920,5 +930,6 @@ class HomeScreen(tk.Frame):
                 row['sale_item_quantity'],
                 f"₱{row['product_price']:.2f}"
             ))
+
 
 
