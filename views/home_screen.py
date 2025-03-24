@@ -105,13 +105,16 @@ class HomeScreen(tk.Frame):
             ).pack(side=ctk.LEFT, padx=5)
 
         # Create Scrollable Product Area
-        self.canvas_frame = ctk.CTkCanvas(self.product_section, bg="#F4F4F4", width=490, height=250,
+        self.canvas_frame = ctk.CTkCanvas(self.product_section, bg="#F4F4F4", width=550, height=250,
                                           highlightthickness=0)
         self.canvas_frame.place(x=5, y=50)
 
-        # Corrected CTkScrollbar initialization (height in constructor, not place())
-        self.scrollbar = ctk.CTkScrollbar(self.product_section, orientation="vertical", command=self.canvas_frame.yview,
-                                          height=250)
+        # Increased width for the scrollbar (thicker appearance)
+        self.scrollbar = ctk.CTkScrollbar(self.product_section,
+                                          orientation="vertical",
+                                          command=self.canvas_frame.yview,
+                                          height=250,
+                                          width=20)  # Adjust the width for thickness
         self.scrollbar.place(x=495, y=50)
 
         self.canvas_frame.configure(yscrollcommand=self.scrollbar.set)
@@ -573,31 +576,62 @@ class HomeScreen(tk.Frame):
         self.add_product_frame.place(x=520, y=205)
         self.add_product_frame.pack_propagate(False)
         self.add_product_frame.grid_propagate(False)
+        add_product_font = font.Font(family="Instrument Sans SemiBold", size=8)
+        # Style Configuration (for Colored Entry and Combobox)
+        style = ttk.Style()
+
+        # Custom Entry Style (Colored)
+        style.configure("Custom.TEntry",
+                        fieldbackground="#FFF3CD",  # Entry background
+                        foreground="black",  # Entry text color
+                        borderwidth=1,  # Border width
+                        padding=(5, 3))  # Padding for size control
+
+        # Custom Combobox Style (Colored)
+        style.configure("Custom.TCombobox",
+                        fieldbackground="#FDE0E0",  # Background color
+                        background="#FDE0E0",  # Dropdown background
+                        foreground="black",  # Text color
+                        borderwidth=1,  # Border width
+                        padding=(5, 3))
 
         # Labels and Entry Widgets
-        tk.Label(self.add_product_frame, text="Product Name:", bg="#F4F4F4").grid(row=0, column=0, padx=5, pady=5)
-        self.product_name_entry = ttk.Entry(self.add_product_frame)
+        tk.Label(self.add_product_frame, text="Name of Product:", font=add_product_font, bg="#F4F4F4").grid(row=0,
+                                                                                                            column=0,
+                                                                                                            padx=5,
+                                                                                                            pady=5)
+        self.product_name_entry = ttk.Entry(self.add_product_frame, style="Custom.TEntry")
         self.product_name_entry.grid(row=1, column=0, padx=5, pady=5)
 
-        tk.Label(self.add_product_frame, text="Price:", bg="#F4F4F4").grid(row=0, column=1, padx=5, pady=5)
-        self.product_price_entry = ttk.Entry(self.add_product_frame)
+        tk.Label(self.add_product_frame, text="Price:", font=add_product_font, bg="#F4F4F4").grid(row=0, column=1,
+                                                                                                  padx=5, pady=5)
+        self.product_price_entry = ttk.Entry(self.add_product_frame, style="Custom.TEntry")
         self.product_price_entry.grid(row=1, column=1, padx=5, pady=5)
 
-        tk.Label(self.add_product_frame, text="Category:", bg="#F4F4F4").grid(row=2, column=0, padx=5, pady=5)
+        tk.Label(self.add_product_frame, text="Category:", font=add_product_font, bg="#F4F4F4").grid(row=2, column=0,
+                                                                                                     padx=5, pady=5)
         self.category_var = tk.StringVar(value="Choose Category")
-        self.category_dropdown = ttk.Combobox(self.add_product_frame, textvariable=self.category_var,
-                                                  values=["Donuts", "Bread", "Cakes", "Sandwiches"], state="readonly")
+        self.category_dropdown = ttk.Combobox(self.add_product_frame,
+                                              textvariable=self.category_var,
+                                              values=["Donuts", "Bread", "Cakes", "Sandwiches"],
+                                              state="readonly",
+                                              style="Custom.TCombobox")
         self.category_dropdown.grid(row=3, column=0, padx=5, pady=5)
 
-        tk.Label(self.add_product_frame, text="Stock:", bg="#F4F4F4").grid(row=2, column=1, padx=5, pady=5)
-        self.product_stock_entry = ttk.Entry(self.add_product_frame)
+        tk.Label(self.add_product_frame, text="Stock:", font=add_product_font, bg="#F4F4F4").grid(row=2, column=1,
+                                                                                                  padx=5, pady=5)
+        self.product_stock_entry = ttk.Entry(self.add_product_frame, style="Custom.TEntry")
         self.product_stock_entry.grid(row=3, column=1, padx=5, pady=5)
-
-        # Add Product Button
-        tk.Button(self.add_product_frame, text="Add Product", command=self.add_product_to_database).grid(row=4,
-                                                                                                           column=0,
-                                                                                                           columnspan=2,
-                                                                                                           pady=10)
+        bake_font = ctk.CTkFont(family="Instrument Sans", size=8,weight="bold")
+        ctk.CTkButton(self.add_product_frame,
+                      text="Bake",
+                      command=self.add_product_to_database,
+                      fg_color="#FFB2B3",
+                      text_color="black",  # Text Color
+                      corner_radius=2   ,  # Rounded Corners
+                      width=130,  # Button Width
+                      height=20
+                      ).grid(row=4, column=0, columnspan=2, pady=10)
 
     def add_product_to_database(self):
         name = self.product_name_entry.get().strip()
@@ -639,32 +673,71 @@ class HomeScreen(tk.Frame):
         self.update_product_frame.pack_propagate(False)
         self.update_product_frame.grid_propagate(False)
 
+        update_font = font.Font(family="Instrument Serif", size=15)
+        new_product = font.Font(family="Instrument Sans SemiBold", size=8, weight="bold")
+        # Style Configuration (for Entry Backgrounds)
+        style = ttk.Style()
+
+        # Customize Entry widgets (Reduced Size)
+        style.configure("Custom.TEntry",
+                        fieldbackground="#FFF3CD",  # Background color
+                        background="#FFF3CD",  # Background (for older versions)
+                        foreground="black",  # Text color
+                        padding=(3, 1))  # (Width, Height) - Reduced size
+
+        # Payment Dropdown Styling (Reduced Size)
+        style.configure("Custom.TCombobox",
+                        fieldbackground="#FDE0E0",
+                        background="#FDE0E0",
+                        foreground="#8A8A8A",
+                        borderwidth=1,
+                        relief="solid",
+                        padding=(3, 1))  # Reduced size (smaller dropdown height)
+
+        # Customize the dropdown when readonly
+        style.map("Custom.TCombobox",
+                  fieldbackground=[("readonly", "#FDE0E0"), ("!disabled", "#FDE0E0")],
+                  selectbackground=[("readonly", "#FDE0E0")],
+                  selectforeground=[("readonly", "#8A8A8A")],
+                  arrowcolor=[("readonly", "#F5A5A5")])
+
         # Product Details
-        tk.Label(self.update_product_frame, text=product['product_name'], bg="#F8F8F8").grid(row=0, column=0, columnspan=2, pady=2)
+        tk.Label(self.update_product_frame, text=product['product_name'], font=update_font, bg="#F8F8F8").grid(row=0,
+                                                                                                               column=0,
+                                                                                                               columnspan=2,
+                                                                                                               pady=2)
 
         # New Name Entry
-        tk.Label(self.update_product_frame, text="New Product Name:", bg="#F8F8F8").grid(row=1, column=0, padx=5, pady=5)
-        self.new_name_entry = ttk.Entry(self.update_product_frame)
+        tk.Label(self.update_product_frame, text="New Product Name:", font=new_product, bg="#F8F8F8").grid(row=1,
+                                                                                                           column=0,
+                                                                                                           padx=5,
+                                                                                                           pady=5)
+        self.new_name_entry = ttk.Entry(self.update_product_frame, style="Custom.TEntry")
         self.new_name_entry.insert(0, product['product_name'])
         self.new_name_entry.grid(row=2, column=0, padx=5, pady=5)
 
         # Category Dropdown
-        tk.Label(self.update_product_frame, text="Category:", bg="#F8F8F8").grid(row=1, column=1, padx=5, pady=5)
+        tk.Label(self.update_product_frame, text="Category:", font=new_product, bg="#F8F8F8").grid(row=1, column=1,
+                                                                                                   padx=5, pady=5)
         self.update_category_var = tk.StringVar(value=product['product_category'].capitalize())
-        self.update_category_dropdown = ttk.Combobox(self.update_product_frame, textvariable=self.update_category_var,
+        self.update_category_dropdown = ttk.Combobox(self.update_product_frame,
+                                                     textvariable=self.update_category_var,
                                                      values=["Donuts", "Bread", "Cakes", "Sandwiches"],
+                                                     style="Custom.TCombobox",
                                                      state="readonly")
         self.update_category_dropdown.grid(row=2, column=1, padx=5, pady=5)
 
         # Stock Entry
-        tk.Label(self.update_product_frame, text="Stock:", bg="#F8F8F8").grid(row=3, column=0, padx=5, pady=5)
-        self.update_stock_entry = ttk.Entry(self.update_product_frame)
+        tk.Label(self.update_product_frame, text="Stock:", font=new_product, bg="#F8F8F8").grid(row=3, column=0, padx=5,
+                                                                                                pady=5)
+        self.update_stock_entry = ttk.Entry(self.update_product_frame, style="Custom.TEntry")
         self.update_stock_entry.insert(0, str(product['product_stock']))
         self.update_stock_entry.grid(row=4, column=0, padx=5, pady=5)
 
         # Price Entry
-        tk.Label(self.update_product_frame, text="Price:", bg="#F8F8F8").grid(row=3, column=1, padx=5, pady=5)
-        self.update_price_entry = ttk.Entry(self.update_product_frame)
+        tk.Label(self.update_product_frame, text="Price:", font=new_product, bg="#F8F8F8").grid(row=3, column=1, padx=5,
+                                                                                                pady=5)
+        self.update_price_entry = ttk.Entry(self.update_product_frame, style="Custom.TEntry")
         self.update_price_entry.insert(0, str(product['product_price']))
         self.update_price_entry.grid(row=4, column=1, padx=5, pady=5)
 
@@ -672,16 +745,34 @@ class HomeScreen(tk.Frame):
         button_frame = tk.Frame(self.update_product_frame, bg="#F8F8F8")
         button_frame.grid(row=5, column=0, columnspan=2, pady=5)
 
-        tk.Button(button_frame, text="Toss to Bin",
-                  command=lambda: self.product_controller.delete_product(product['product_id'])).pack(side=tk.LEFT, padx=10)
-        tk.Button(button_frame, text="Revise",
-                  command=lambda p=product: self.product_controller.update_product(
-                      p['product_id'],
-                      self.new_name_entry.get().strip(),
-                      self.update_category_var.get().strip(),
-                      self.update_stock_entry.get().strip(),
-                      self.update_price_entry.get().strip()
-                  )).pack(side=tk.RIGHT, padx=10)
+        # Toss to Bin Button (Smaller size)
+        ctk.CTkButton(button_frame,
+                      text="Toss to Bin",
+                      command=lambda: self.product_controller.delete_product(product['product_id']),
+                      fg_color="#FDE0E0",  # Light pink background
+                      hover_color="#E5533C",  # Darker red (hover effect)
+                      text_color="black",  # Black text
+                      corner_radius=2,  # Less rounded corners
+                      width=60,  # Reduced width
+                      height=15  # Reduced height
+                      ).pack(side=tk.LEFT, padx=5)
+
+        # Revise Button (Smaller size)
+        ctk.CTkButton(button_frame,
+                      text="Revise",
+                      command=lambda p=product: self.product_controller.update_product(
+                          p['product_id'],
+                          self.new_name_entry.get().strip(),
+                          self.update_category_var.get().strip(),
+                          self.update_stock_entry.get().strip(),
+                          self.update_price_entry.get().strip()
+                      ),
+                      fg_color="#FFB2B3",  # Light red background
+                      hover_color="#36648B",  # Darker blue (hover effect)
+                      text_color="black",  # Black text
+                      corner_radius=2,  # Less rounded corners
+                      height=15  # Reduced height
+                      ).pack(side=tk.RIGHT, padx=10)
 
     def destroy_inventory_and_update_frames(self):
         if hasattr(self, 'add_product_frame') and self.add_product_frame.winfo_exists():
@@ -700,10 +791,35 @@ class HomeScreen(tk.Frame):
         self.sales_frame.place(x=10, y=90)
         self.sales_frame.pack_propagate(False)
 
+        sales_font = font.Font(family="Instrument Serif", size=10)
+        sales_item_font = font.Font(family="Instrument Sans SemiBold", size=10)
         # Treeview for Sales
+        style = ttk.Style()
+
+        # Configure Treeview Header
+        style.configure("Sales.Treeview.Heading",
+                        font=sales_font,
+                        background="#FDE0E0",  # Soft pink background
+                        foreground="black",  # Black text
+                        relief="flat")  # Flat header
+
+        # Configure Treeview Rows
+        style.configure("Sales.Treeview",
+                        font=sales_item_font,
+                        background="#F8F8F8",  # Light grey rows
+                        foreground="black",  # Black text
+                        rowheight=20,  # Taller rows for better appearance
+                        fieldbackground="#F8F8F8")
+
+        # Highlighted Row (when selected)
+        style.map("Sales.Treeview",
+                  background=[("selected", "#FAD2D2")],  # Soft red on selection
+                  foreground=[("selected", "black")])
+
         self.sales_tree = ttk.Treeview(self.sales_frame,
-                                      columns=("Sale ID", "Payment", "Amount", "Date", "Time"),
-                                      show="headings")
+                                       columns=("Sale ID", "Payment", "Amount", "Date", "Time"),
+                                       show="headings",
+                                       style="Sales.Treeview")
 
         # Set Treeview Headings
         self.sales_tree.heading("Sale ID", text="Sale ID")
