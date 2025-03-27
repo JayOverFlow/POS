@@ -51,7 +51,7 @@ class HomeScreen(tk.Frame):
                       text_color="black",
                       width=100,
                       height=10,
-                      command=self.create_product_section
+                      command=self.create_product_section and self.create_cart
                       ).pack(side=tk.LEFT, padx=5)
 
         # Inventory Button
@@ -79,18 +79,6 @@ class HomeScreen(tk.Frame):
     # ---------------- Product Section ----------------
     def create_product_section(self):
         self.destroy_inventory_and_update_frames()
-
-        self.create_cart
-
-        if hasattr(self, 'sale_receipt_frame'):
-            self.sale_receipt_frame.destroy()
-
-        if hasattr(self, 'sales_tree'):
-            self.sales_tree.destroy()
-
-        if hasattr(self, 'sales_frame'):
-            self.sales_frame.destroy()
-
         self.product_section = tk.Frame(self, bg="#F4F4F4", width=500, height=300)
         self.product_section.place(x=10, y=90)
         self.product_section.pack_propagate(False)
@@ -579,9 +567,6 @@ class HomeScreen(tk.Frame):
 
         if hasattr(self, 'sales_tree'):
             self.sales_tree.destroy()
-
-        if hasattr(self, 'sales_frame'):
-            self.sales_frame.destroy()
 
         self.create_product_section()
 
